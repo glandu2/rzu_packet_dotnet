@@ -1,0 +1,36 @@
+#ifndef PACKETITERATOR_H
+#define PACKETITERATOR_H
+
+#include "Packet/PacketStructsName.h"
+
+@INCLUDE_PART@
+
+namespace RappelzPackets {
+
+#define PACKET_CASE(type_) \
+	case type_::packetID: \
+		result = Functor<type_>()(args...); \
+		return true;
+
+#define PACKET_CALL(type_) \
+	Functor<type_>()(args...)
+
+	
+template<template<typename> class Functor, typename Result, typename... Args>
+bool processPacket(SessionType type, SessionPacketOrigin origin, packet_version_t version, uint16_t packetId, Result& result, Args... args) {
+	// Ignore dummy packet
+	if(packetId == 9999)
+		return true;
+	packet_type_id_t packetType = PacketMetadata::convertPacketIdToTypeId(packetId, type, origin, version);
+
+@FUNCTION_SWITCH_PART@
+	return false;
+}
+
+template<template<typename> class Functor, typename... Args>
+void iteratePackets(Args... args) {
+@FUNCTION_ITERATE_PART@
+}
+}
+
+#endif
